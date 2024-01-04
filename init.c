@@ -14,9 +14,12 @@ __attribute((naked)) void exit(int code) {
 }
 
 void _start() {
-  static const char hello[] = "Hello from zhuowei's init!\n";
+  static const char hello[] = "Hello from zhuowei's init! 0\n";
+  char hello2[sizeof(hello)];
+  __builtin_memcpy(hello2, hello, sizeof(hello));
   for (int i = 0; i < 10; i++) {
-    write(1, (void*)hello, sizeof(hello) - 1);
+    hello2[sizeof(hello2) - 3] = '0' + i;
+    write(1, (void*)hello2, sizeof(hello2) - 1);
   }
   exit(42);
 }
