@@ -1,5 +1,7 @@
 """
 https://github.com/torvalds/linux/blob/610a9b8f49fbcf1100716370d3b5f6f884a2835a/mm/mmap.c#L1770
+ffff80008041cbf0 T get_unmapped_area
+ffff80008041f388 T generic_get_unmapped_area
 ffff80008041f568 T generic_get_unmapped_area_topdown
 ffff80008041ef58 T vm_unmapped_area
 ffff8000803e0c68 T randomize_stack_top
@@ -11,10 +13,12 @@ ffff8000803e0c68 T randomize_stack_top
 with open("linux64k/boot/linux-image", "rb") as infile:
 	indata = infile.read()
 indata = bytearray(indata)
-offset = 0x41f754
+# generic_get_unmapped_area_topdown
+offset = 0x41f608
 # mov x1, #0xfc0000000
 # (64G, MACH_VM_MAX_ADDRESS_RAW on iOS)
 indata[offset:offset + 4] = b"\xe1\x17\x62\xb2"
+# randomize_stack_top
 # mov x0, #0xfc0000000
 # ret
 offset = 0x3e0c68
