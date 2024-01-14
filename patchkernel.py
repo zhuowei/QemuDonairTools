@@ -52,5 +52,15 @@ indata[offset:offset + 8] = b"\x40\x55\xb5\xd2\x40\x01\xc0\xf2"
 # 4: f2c00155     	movk	x21, #0xa, lsl #32
 offset = 0x592b94
 indata[offset:offset + 8] = b"\x55\x55\xb5\xd2\x55\x01\xc0\xf2"
+# vdso
+# ffff800081590000 D vdso_start
+# ffff8000815a0000 D vdso_end
+vdso_start = 0x1590000
+vdso_end = 0x15a0000
+vdso_data = indata[vdso_start:vdso_end]
+import patchlibc
+patchlibc.patch(vdso_data)
+indata[vdso_start:vdso_end] = vdso_data
+
 with open("linux64k/image-patched", "wb") as outfile:
     outfile.write(indata)
