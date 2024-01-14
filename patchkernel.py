@@ -40,5 +40,17 @@ indata[offset:offset + 8] = b"\xe0\x17\x62\xb2\xc0\x03\x5f\xd6"
 # 4: f2c00140     	movk	x0, #0xa, lsl #32
 offset = 0x592e6c
 indata[offset:offset + 8] = b"\x40\x55\xb5\xd2\x40\x01\xc0\xf2"
+# 0x592b94: 0x3201f3f5   unknown     mov    w21, #-0x55555556
+# 0x592b98: 0xf2d55555   unknown     movk   x21, #0xaaaa, lsl #32
+# 0x592b9c: 0x37b00de0   unknown     tbnz   w0, #0x16, 0x592d58
+#
+# 0x592d58: 0xf90007e2   unknown     str    x2, [sp, #0x8]
+# 0x592d5c: 0xb90013e3   unknown     str    w3, [sp, #0x10]
+# 0x592d60: 0x97f9382c   unknown     bl     0x3e0e10 // arch_mmap_rnd
+# replace with
+# 0: d2b55555     	mov     x21, #0xaaaa0000
+# 4: f2c00155     	movk	x21, #0xa, lsl #32
+offset = 0x592b94
+indata[offset:offset + 8] = b"\x55\x55\xb5\xd2\x55\x01\xc0\xf2"
 with open("linux64k/image-patched", "wb") as outfile:
     outfile.write(indata)
