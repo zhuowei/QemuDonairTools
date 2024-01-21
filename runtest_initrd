@@ -1,0 +1,8 @@
+#!/bin/sh
+cp ruby-3.1.2.tar.gz /tmp
+cd /tmp
+cat ruby-3.1.2.tar.gz >/dev/null
+date +%s
+gunzip ruby-3.1.2.tar.gz
+gzip ruby-3.1.2.tar
+date +%s
