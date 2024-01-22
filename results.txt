@@ -1,0 +1,206 @@
+Tested on:
+
+- Macbook Pro 14 (Apple M2 Pro, 16GB RAM, macOS Sonoma 14.2, Xcode 15.1)
+
+- Native/Hardware accelerated virtualization (VMWare Player): VMWare Fusion 13.5.0, Ubuntu 22.04.3 LTS (4KB page size kernel)
+- QEMU + Donair: commit 54d7846b5da580f384e3f779b9b67b20b26c09f3
+QEMU emulator version 8.2.50 (v8.2.0-217-g54d7846b5d)
+Copyright (c) 2003-2023 Fabrice Bellard and the QEMU Project developers
+- QEMU TCG only: qemu from homebrew
+QEMU emulator version 8.2.0
+Copyright (c) 2003-2023 Fabrice Bellard and the QEMU Project developers
+
+- CoreMark d5fad6bd094899101a4e5fd53af7298160ced6ab
+
+Native (VMWare Player):
+$ uname -a
+Linux ruby 6.5.0-14-generic #14~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Mon Nov 20 20:26:31 UTC 2 aarch64 aarch64 aarch64 GNU/Linux
+$ ./coremark.exe 0x0 0x0 0x66 600000 7 1 2000 > ./run_600000.log
+zhuowei@ruby:~/coremark$ cat run_600000.log 
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 14922
+Total time (secs): 14.922000
+Iterations/Sec   : 40209.087254
+Iterations       : 600000
+Compiler version : GCC11.4.0
+Compiler flags   : -O2 -DPERFORMANCE_RUN=1  -lrt
+Memory location  : Please put data memory location here
+			(e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[0]crcfinal      : 0xa14c
+Correct operation validated. See README.md for run and reporting rules.
+CoreMark 1.0 : 40209.087254 / GCC11.4.0 -O2 -DPERFORMANCE_RUN=1  -lrt / Heap
+
+zhuowei@ruby:~$ busybox sh testruby_wrap.sh 
+real	0m 9.78s
+user	0m 9.60s
+sys	0m 0.16s
+zhuowei@ruby:~$ busybox sh testruby_wrap.sh 
+real	0m 9.71s
+user	0m 9.63s
+sys	0m 0.06s
+zhuowei@ruby:~$ busybox sh testruby_wrap.sh 
+real	0m 9.72s
+user	0m 9.67s
+sys	0m 0.04s
+zhuowei@ruby:~$ busybox sh testruby_wrap.sh 
+real	0m 9.75s
+user	0m 9.66s
+sys	0m 0.07s
+
+(Note that we're using Busybox Gzip here: GNU Gzip is much faster than busybox gzip:
+
+$ sh testruby_wrap.sh 
+real	0m 2.60s
+user	0m 2.54s
+sys	0m 0.06s
+
+But we're interested in comparing CPU performance, and most software isn't as optimized as GNU Gzip, so busybox gzip is more representative)
+
+On 16k kernel:
+
+/ # uname -a
+Linux (none) 6.6.3-411.asahi.fc39.aarch64+16k #1 SMP PREEMPT_DYNAMIC Tue Dec 19 10:21:20 UTC 2023 aarch64 GNU/Linux
+
+# busybox time ../coremark.exe 0x0 0x0 0x66 600000 7 1 2000 > ./run_600000.log
+real	0m 14.86s
+user	0m 13.67s
+sys	0m 1.19s
+/tmp # cat run_600000.log 
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 5702
+Total time (secs): 5.702000
+Iterations/Sec   : 105226.236408
+ERROR! Must execute for at least 10 secs for a valid result!
+Iterations       : 600000
+Compiler version : GCC11.4.0
+Compiler flags   : -O2 -DPERFORMANCE_RUN=1  -lrt
+Memory location  : Please put data memory location here
+			(e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[0]crcfinal      : 0xa14c
+Errors detected
+
+600000 / 14.86 = 40376.85060565276, so approximately same as native
+
+# sh testruby_wrap.sh 
+real	0m 10.68s
+user	0m 10.00s
+sys	0m 0.55s
+
+# sh testruby_wrap.sh 
+real	0m 10.64s
+user	0m 9.97s
+sys	0m 0.55s
+
+# sh testruby_wrap.sh 
+real	0m 10.65s
+user	0m 10.01s
+sys	0m 0.52s
+
+/ # sh testruby_wrap.sh 
+real	0m 10.64s
+user	0m 9.98s
+sys	0m 0.53s
+
+On 64k kernel:
+
+/ # uname -a
+Linux (none) 6.5.0-9-generic-64k #9-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct  6 22:22:30 UTC 2023 aarch64 GNU/Linux
+
+/tmp # busybox time ../coremark.exe 0x0 0x0 0x66 600000 7 1 2000 > ./run_600000.log
+real	0m 15.04s
+user	0m 15.03s
+sys	0m 0.00s
+/tmp # cat run_600000.log 
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 5776
+Total time (secs): 5.776000
+Iterations/Sec   : 103878.116343
+ERROR! Must execute for at least 10 secs for a valid result!
+Iterations       : 600000
+Compiler version : GCC11.4.0
+Compiler flags   : -O2 -DPERFORMANCE_RUN=1  -lrt
+Memory location  : Please put data memory location here
+			(e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[0]crcfinal      : 0xa14c
+Errors detected
+
+600000 / 15.04 = 39893.6170212766
+
+/ # sh testruby_wrap.sh 
+real	0m 10.43s
+user	0m 9.97s
+sys	0m 0.44s
+/ # sh testruby_wrap.sh 
+real	0m 10.44s
+user	0m 10.04s
+sys	0m 0.39s
+/ # sh testruby_wrap.sh 
+real	0m 10.36s
+user	0m 9.91s
+sys	0m 0.45s
+/ # sh testruby_wrap.sh 
+real	0m 10.35s
+user	0m 9.86s
+sys	0m 0.47s
+
+QEMU TCG:
+
+/ # uname -a
+Linux (none) 6.5.0-9-generic-64k #9-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct  6 22:22:30 UTC 2023 aarch64 GNU/Linux
+
+# busybox time ../coremark.exe 0x0 0x0 0x66 600000 7 1 2000 > ./run_600000.
+log
+real	1m 31.91s
+user	1m 31.85s
+sys	0m 0.00s
+# cat run_600000.log
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 91898
+Total time (secs): 91.898000
+Iterations/Sec   : 6528.977780
+Iterations       : 600000
+Compiler version : GCC11.4.0
+Compiler flags   : -O2 -DPERFORMANCE_RUN=1  -lrt
+Memory location  : Please put data memory location here
+			(e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[0]crcfinal      : 0xa14c
+Correct operation validated. See README.md for run and reporting rules.
+CoreMark 1.0 : 6528.977780 / GCC11.4.0 -O2 -DPERFORMANCE_RUN=1  -lrt / Heap
+
+/ # sh testruby_wrap.sh 
+real	0m 29.41s
+user	0m 29.18s
+sys	0m 0.21s
+/ # sh testruby_wrap.sh 
+real	0m 29.57s
+user	0m 29.28s
+sys	0m 0.27s
+/ # sh testruby_wrap.sh 
+real	0m 30.76s
+user	0m 30.55s
+sys	0m 0.19s
+/ # sh testruby_wrap.sh 
+real	0m 29.63s
+user	0m 29.41s
+sys	0m 0.21s
+

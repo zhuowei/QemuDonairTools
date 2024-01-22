@@ -2,16 +2,21 @@
 https://github.com/torvalds/linux/blob/610a9b8f49fbcf1100716370d3b5f6f884a2835a/mm/mmap.c#L1770
 ffff80008037f0b0 T generic_get_unmapped_area_topdown
 
-0x37f274: 0xcb000021   unknown     sub    x1, x1, x0
-0x37f278: 0x910023e0   unknown     add    x0, sp, #0x8
-0x37f27c: 0xa9027fe1   unknown     stp    x1, xzr, [sp, #0x20]
-0x37f280: 0x97fffe2c   unknown     bl     0x37eb30
+ffff80008037eb30 T vm_unmapped_area
+
+0x37f14c: 0xf9402ee1   unknown     ldr    x1, [x23, #0x58]
+0x37f150: 0xd5384100   unknown     mrs    x0, SP_EL0
+0x37f154: 0xf9400000   unknown     ldr    x0, [x0]
+0x37f158: 0x910023e0   unknown     add    x0, sp, #0x8
+0x37f15c: 0xa9027fe1   unknown     stp    x1, xzr, [sp, #0x20]
+0x37f160: 0xf9001bff   unknown     str    xzr, [sp, #0x30]
+0x37f164: 0x97fffe73   unknown     bl     0x37eb30 // vm_unmapped_area
 """
 with open("linuxasahi/kernel16k", "rb") as infile:
     indata = infile.read()
 indata = bytearray(indata)
 # generic_get_unmapped_area_topdown
-offset = 0x37f274
+offset = 0x37f14c
 # mov x1, #0xfc0000000
 # (64G, MACH_VM_MAX_ADDRESS_RAW on iOS)
 indata[offset:offset + 4] = b"\xe1\x17\x62\xb2"
